@@ -1,0 +1,137 @@
+{
+  "entities": {
+    "UserMetric": {
+      "title": "User Registration & Activity Metric",
+      "description": "Tracks an authenticated user's registration timestamp and latest activity date for real-time admin analytics.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the user",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Verified user email address",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name of the user",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["google", "email"],
+          "description": "Authentication provider used"
+        },
+        "lastActiveDate": {
+          "type": "string",
+          "description": "UTC date key YYYY-MM-DD of latest activity",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "registeredAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of first registration"
+        },
+        "lastActiveAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of latest activity heartbeat"
+        }
+      },
+      "required": [
+        "uid",
+        "email",
+        "displayName",
+        "provider",
+        "lastActiveDate",
+        "registeredAt",
+        "lastActiveAt"
+      ]
+    },
+    "DailyActiveUserEntry": {
+      "title": "Daily Active User Entry",
+      "description": "Non-PII daily presence document per user under a UTC date bucket for real-time DAU counts.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "dateKey": {
+          "type": "string",
+          "description": "UTC date string YYYY-MM-DD matching parent document ID",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "lastSeenAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when user was last seen on this date"
+        }
+      },
+      "required": ["uid", "dateKey", "lastSeenAt"]
+    },
+    "AdminRecord": {
+      "title": "Admin Record",
+      "description": "Trusted allowlist entry granting admin-only Firestore read/management privileges.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the admin",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Admin email address",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "grantedBy": {
+          "type": "string",
+          "description": "UID of admin who granted access",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "grantedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when admin access was granted"
+        }
+      },
+      "required": ["uid", "email", "grantedBy", "grantedAt"]
+    }
+  },
+  "firestore": {
+    "/userMetrics/{userId}": {
+      "schema": { "$ref": "#/entities/UserMetric" },
+      "description": "User registration and activity telemetry documents keyed by Firebase UID."
+    },
+    "/dailyActivity/{dateId}/users/{userId}": {
+      "schema": { "$ref": "#/entities/DailyActiveUserEntry" },
+      "description": "Per-day active user presence records keyed by YYYY-MM-DD and Firebase UID."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Admin role directory checked by Firestore security rules."
+    }
+  }
+}

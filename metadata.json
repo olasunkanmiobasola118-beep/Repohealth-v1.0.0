@@ -1,0 +1,6 @@
+{
+  "name": "Repo Health",
+  "description": "AI-powered repository intelligence, deterministic code scanning, and verifiable fix orchestration platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
